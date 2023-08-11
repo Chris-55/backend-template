@@ -1,36 +1,62 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import io.gitlab.arturbosch.detekt.Detekt
+import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
-    id("org.springframework.boot") version "3.0.9"
-    id("io.spring.dependency-management") version "1.1.2"
-    kotlin("jvm") version "1.7.22"
-    kotlin("plugin.spring") version "1.7.22"
+    base
+    kotlin("jvm") version DependencyVersion.kotlin
+    id("org.springframework.boot") version DependencyVersion.spring apply false
+    id("io.spring.dependency-management") version DependencyVersion.springDependencyManagementPlugin
+    id("io.gitlab.arturbosch.detekt") version DependencyVersion.detekt
 }
 
-group = "com.backend.template"
-version = "0.0.1-SNAPSHOT"
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs += "-Xjsr305=strict"
-        jvmTarget = "17"
+allprojects {
+    repositories {
+        mavenCentral()
     }
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+subprojects {
+    group = "com.backend.template"
+    version = "0.0.1-SNAPSHOT"
+
+    // override spring-managed version
+    extra["kotlin.version"] = DependencyVersion.kotlin
+
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    apply(plugin = "io.spring.dependency-management")
+    the<DependencyManagementExtension>().apply {
+        imports {
+            mavenBom(SpringBootPlugin.BOM_COORDINATES)
+        }
+    }
+
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+    detekt {
+        buildUponDefaultConfig = true
+        autoCorrect = System.getenv("DETEKT_AUTOCORRECT") != null
+    }
+    tasks.withType<Detekt>().configureEach {
+        reports {
+            html.required.set(true) // observe findings in your browser with structure and code snippets
+        }
+    }
+
+
+    tasks.getByName("test", Test::class) {
+        useJUnitPlatform()
+    }
+
+    dependencies {
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:${DependencyVersion.detekt}")
+
+        api(kotlin("stdlib-jdk8"))
+        api("org.jetbrains.kotlin:kotlin-reflect")
+        api("org.slf4j:slf4j-api")
+    }
 }
