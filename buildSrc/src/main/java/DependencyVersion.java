@@ -7,8 +7,8 @@ public class DependencyVersion {
     public static final String jooqEtienneStuderPlugin = "8.2.1";
     public static final String postgres = "42.6.0";
     public static final String jakartaXmlBindApi = "4.0.0";
-    public static final String jooq = "3.18.4";
-    public static final String flywayPlugin = "9.19.4";
+    public static final String jooq = "3.18.6";
+    public static final String flywayPlugin = "9.21.1";
     public static final String jwt = "4.2.2";
     public static final String detekt = "1.23.1";
 }
