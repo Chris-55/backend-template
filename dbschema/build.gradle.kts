@@ -6,7 +6,6 @@ plugins {
 dependencies {
     runtimeOnly("org.postgresql:postgresql:${DependencyVersion.postgres}")
 
-
     api("org.jooq:jooq:${DependencyVersion.jooq}")
     implementation("org.jooq:jooq-codegen:${DependencyVersion.jooq}")
     // jooq needs to have this specified explicitly
@@ -47,7 +46,7 @@ jooq {
 
                     target.apply {
                         packageName = "com.backend.template.dbschema.jooqGenerated"
-                        directory = "./src/generated/kotlin"
+                        directory = "./src/generated/java"
                     }
 
                     strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
